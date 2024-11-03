@@ -11,9 +11,9 @@ import os
 app = Flask(__name__)
 
 # Spotify API credentials
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = os.getenv("REDIRECT_URI")
+CLIENT_ID = '1c37db7966804c17ada79eff73b8b247'
+CLIENT_SECRET = '90977a877a8f4ba08bc95fe2ef7585df'
+REDIRECT_URI = 'http://localhost:8888/callback/'
 
 # Database setup
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tracks.db'
@@ -84,6 +84,37 @@ def today_count():
     today = datetime.utcnow().date()
     count = Track.query.filter(func.date(Track.played_at) == today).count()
     return jsonify(count)
+
+@app.route('/month-tracks', methods=['GET'])
+def month_tracks():
+    now = datetime.utcnow()
+    current_month = now.month
+    current_year = now.year
+
+    # Define the raw SQL query
+    sql_query = """
+        SELECT track_name, artist_name, played_at
+        FROM track
+        WHERE EXTRACT(MONTH FROM played_at) = :current_month
+        AND EXTRACT(YEAR FROM played_at) = :current_year
+        ORDER BY played_at DESC
+    """
+
+    # Execute the query with parameters
+    result = db.session.execute(sql_query, {'current_month': current_month, 'current_year': current_year})
+
+    # Fetch all results
+    tracks = result.fetchall()
+
+    # Check if tracks were found
+    if not tracks:
+        return jsonify({"message": "No tracks found for the current month."}), 404
+    
+    # Convert result to a list of dictionaries
+    track_list = [{'track_name': track[0], 'artist_name': track[1], 'played_at': track[2]} for track in tracks]
+
+    # Return the tracks as JSON
+    return jsonify(track_list)
 
 if __name__ == '__main__':
     app.run(debug=True)

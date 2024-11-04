@@ -6,6 +6,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import os
+import pytz
 
 
 app = Flask(__name__)
@@ -90,31 +91,37 @@ def month_tracks():
     now = datetime.utcnow()
     current_month = now.month
     current_year = now.year
-
-    # Define the raw SQL query
-    sql_query = """
-        SELECT track_name, artist_name, played_at
-        FROM track
-        WHERE EXTRACT(MONTH FROM played_at) = :current_month
-        AND EXTRACT(YEAR FROM played_at) = :current_year
-        ORDER BY played_at DESC
-    """
-
-    # Execute the query with parameters
-    result = db.session.execute(sql_query, {'current_month': current_month, 'current_year': current_year})
-
-    # Fetch all results
-    tracks = result.fetchall()
-
-    # Check if tracks were found
+    tracks = db.session.query(
+        Track.track_name, 
+        Track.artist_name, 
+        Track.played_at
+    ).filter(
+        db.extract('month', Track.played_at) == current_month,
+        db.extract('year', Track.played_at) == current_year
+    ).all()
     if not tracks:
         return jsonify({"message": "No tracks found for the current month."}), 404
-    
-    # Convert result to a list of dictionaries
-    track_list = [{'track_name': track[0], 'artist_name': track[1], 'played_at': track[2]} for track in tracks]
+    tracks_dic = [{'track_name': track[0], 'artist_name': track[1], 'played_at': track[2]} for track in tracks]
+    print(tracks_dic)
+    return jsonify(tracks_dic)
 
-    # Return the tracks as JSON
-    return jsonify(track_list)
+@app.route('/month-count', methods=['GET'])
+def month_count():
+    now = datetime.utcnow()
+    current_month = now.month
+    current_year = now.year
+    count = db.session.query(
+        Track.track_name, 
+        Track.artist_name, 
+        Track.played_at
+    ).filter(
+        db.extract('month', Track.played_at) == current_month,
+        db.extract('year', Track.played_at) == current_year
+    ).count()
+    if not count:
+        return jsonify({"message": "No tracks found for the current month."}), 404
+    print(count)
+    return jsonify(count)
 
 if __name__ == '__main__':
     app.run(debug=True)

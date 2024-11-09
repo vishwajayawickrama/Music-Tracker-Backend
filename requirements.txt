@@ -1,0 +1,6 @@
+Flask
+Flask-SQLAlchemy
+spotipy
+apscheduler
+pytz
+flask-cors

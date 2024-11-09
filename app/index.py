@@ -7,9 +7,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import os
 import pytz
+from flask_cors import CORS
+
 
 
 app = Flask(__name__)
+CORS(app)
 
 # Spotify API credentials
 CLIENT_ID = '1c37db7966804c17ada79eff73b8b247'
@@ -66,7 +69,7 @@ def recent_tracks():
     fetch_recent_tracks()
     # Fetch all tracks from the database
     tracks = Track.query.order_by(Track.played_at.desc()).all()
-    return jsonify([{'track_name': t.track_name, 'artist_name': t.artist_name, 'played_at': t.played_at} for t in tracks])
+    return jsonify([{'track_id': t.id, 'track_name': t.track_name, 'artist_name': t.artist_name, 'played_at': t.played_at} for t in tracks])
 
 @app.route('/recent-count', methods=['GET'])
 def recent_count():

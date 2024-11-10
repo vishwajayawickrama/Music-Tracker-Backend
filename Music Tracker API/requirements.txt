@@ -1,0 +1,9 @@
+Flask
+Flask-CORS
+Flask-SQLAlchemy
+spotipy
+APScheduler
+SQLAlchemy
+pytz
+python-dotenv
+psycopg2-binary

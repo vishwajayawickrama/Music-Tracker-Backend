@@ -47,18 +47,21 @@ def month_tracks():
         db.extract('year', Track.played_at) == current_year
     ).all()
     tracks_dic = [{'track_name': track[0], 'artist_name': track[1], 'played_at': track[2]} for track in tracks]
-    return jsonify(tracks_dic) if tracks else jsonify({"message": "No tracks found for the current month."}), 404
+    return jsonify(tracks_dic) if tracks else jsonify({"message": "No tracks found for the current month."})
 
 # Monthly Count
 @track_bp.route('/month-count', methods=['GET'])
 def month_count():
     now = datetime.utcnow()
-    current_month_start = now.replace(day=1)
-    count = Track.query.filter(
-        func.date_trunc('month', Track.played_at) == current_month_start
+    current_month = now.month
+    current_year = now.year
+    count = db.session.query(
+        Track.track_name, Track.artist_name, Track.played_at
+    ).filter(
+        db.extract('month', Track.played_at) == current_month,
+        db.extract('year', Track.played_at) == current_year
     ).count()
-    
-    return jsonify(count) if count else jsonify({"message": "No tracks found for the current month."}), 404
+    return jsonify(count) if count else jsonify({"message": "No tracks found for the current Month."})
 
 # Yearly Tracks
 @track_bp.route('/year-tracks', methods=['GET'])
@@ -71,7 +74,7 @@ def year_tracks():
         db.extract('year', Track.played_at) == current_year
     ).all()
     tracks_dic = [{'track_name': track[0], 'artist_name': track[1], 'played_at': track[2]} for track in tracks]
-    return jsonify(tracks_dic) if tracks else jsonify({"message": "No tracks found for the current year."}), 404
+    return jsonify(tracks_dic) if tracks else jsonify({"message": "No tracks found for the current year."})
 
 # Yearly Count
 @track_bp.route('/year-count', methods=['GET'])
@@ -81,5 +84,5 @@ def year_count():
     count = Track.query.filter(
         db.extract('year', Track.played_at) == current_year
     ).count()
-    return jsonify(count) if count else jsonify({"message": "No tracks found for the current year."}), 404
+    return jsonify(count) if count else jsonify({"message": "No tracks found for the current year."})
 

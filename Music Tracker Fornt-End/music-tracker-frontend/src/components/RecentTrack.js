@@ -21,10 +21,10 @@ const RecentTracks = () => {
       console.log(data);
     return (
         <>
-        <div className="bg-gray-100 rounded-lg p-4 w-full max-w-md ml-10 shadow-md">
-            <h2 className="text-lg font-bold mb-4 text-gray-700">Recent Tracks</h2>
+        <div className="bg-gray-100 rounded-lg p-3 w-full max-w-md ml-5 shadow-md">
+            <h2 className="text-lg font-bold mb-3 text-gray-700">Recent Tracks</h2>
             <div className="space-y-2">
-            {data.slice(0, 4).map((track) => (
+            {data.slice(0, 3).map((track) => (
                 <div key={track.track_name} className="bg-blue-800 rounded-md p-4 flex justify-between items-center">
                     <div>
                         <p className="text-white font-semibold">{track.track_name}</p>
